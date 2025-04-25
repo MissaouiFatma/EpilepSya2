@@ -1,6 +1,8 @@
 # EpilepSya2    ---Improved Version
 This version is more efficient for users (interface use) ,now pipeline steps are better described for patients and doctors :
 It returns to user to train and select best model one time then run rpedictions via uploading csv files to know if this person is Epileptic,Healthy or Suspect(there is an ambiguity)
+![these are the steps of our pipeline implmenetation_ - visual selection (2)](https://github.com/user-attachments/assets/c2e1280a-ef4b-4ff8-8815-5ff2dc1f01cb)
+
 A further deploymant would be efficient .
 # log in
 
