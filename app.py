@@ -19,6 +19,24 @@ import json
 USER_DB = "users.json"
 PREDICTIONS_LOG = "predictions_log.csv"
 
+
+
+def extract_all_derivative_features(signal):
+    features = []
+    current = signal.copy()
+    for _ in range(3):  # D1, D2, D3
+        current = np.diff(current)
+        features.extend([
+            np.mean(current),
+            np.std(current),
+            np.min(current),
+            np.max(current),
+            np.median(current),
+            kurtosis(current),
+            skew(current)
+        ])
+    return features
+
 if not os.path.exists(USER_DB):
     with open(USER_DB, "w") as f:
         json.dump({}, f)
@@ -151,23 +169,12 @@ elif selection == "Entraînement":
                 st.error("Le fichier CSV doit contenir les colonnes 'classe' et 'filename'.")
                 st.stop()
 
-
-            def extract_features(signal):
-                diff = np.diff(signal)
-                return [
-                    np.mean(diff),
-                    np.std(diff),
-                    np.min(diff),
-                    np.max(diff),
-                    np.median(diff),
-                    kurtosis(diff),
-                    skew(diff)
-                ]
-
-
-            features = raw_data.apply(extract_features, axis=1, result_type='expand')
-            features.columns = ["mean", "std", "min", "max", "median", "kurtosis", "skewness"]
-
+            features = raw_data.apply(extract_all_derivative_features, axis=1, result_type='expand')
+            features.columns = [
+                "mean_d1", "std_d1", "min_d1", "max_d1", "median_d1", "kurtosis_d1", "skewness_d1",
+                "mean_d2", "std_d2", "min_d2", "max_d2", "median_d2", "kurtosis_d2", "skewness_d2",
+                "mean_d3", "std_d3", "min_d3", "max_d3", "median_d3", "kurtosis_d3", "skewness_d3"
+            ]
             X_train, X_test, y_train, y_test = train_test_split(features, labels, test_size=0.3)
             scaler = StandardScaler()
             X_train_scaled = scaler.fit_transform(X_train)
@@ -249,8 +256,15 @@ elif selection == "Prédiction":
                 ]
 
 
-            X_pred = raw_pred.apply(extract_features, axis=1, result_type='expand')
-            X_pred.columns = ["mean", "std", "min", "max", "median", "kurtosis", "skewness"]
+            X_pred = raw_pred.apply(extract_all_derivative_features, axis=1, result_type='expand')
+            X_pred.columns = [
+                "mean_d1", "std_d1", "min_d1", "max_d1", "median_d1", "kurtosis_d1", "skewness_d1",
+                "mean_d2", "std_d2", "min_d2", "max_d2", "median_d2", "kurtosis_d2", "skewness_d2",
+                "mean_d3", "std_d3", "min_d3", "max_d3", "median_d3", "kurtosis_d3", "skewness_d3"
+            ]
+            X_pred_scaled = scaler.transform(X_pred)
+            predictions = model.predict(X_pred_scaled)
+
             X_pred_scaled = scaler.transform(X_pred)
             predictions = model.predict(X_pred_scaled)
 
